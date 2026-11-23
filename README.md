@@ -12,7 +12,7 @@ This repository contains the **official implementation and replication package**
   <img src="Figure/DynaFix_overview.png" alt="DynaFix Overview" width="800">
 </div>
 
-Automated Program Repair (APR) has evolved significantly with Large Language Models (LLMs), yet existing methods often struggle due to their reliance on static code representations, which lack fine-grained execution feedback and are sensitive to syntactic variations. **DynaFix** addresses these limitations by integrating execution-level dynamic information directly into the iterative repair workflow. Utilizing a lightweight instrumentation tool named **ByteTrace**, DynaFix captures runtime variable states, branch paths, and call stacks to provide precise context. This approach mimics human debugging: if a patch fails validation, the system re-executes the program to collect updated execution traces, continuously guiding the LLM’s reasoning and avoiding the blind trial-and-error common in static-only methods.
+Automated Program Repair (APR) has evolved significantly with Large Language Models (LLMs), yet existing methods often struggle due to their reliance on static code representations, which lack fine-grained execution feedback and are sensitive to syntactic variations. **DynaFix** addresses these limitations by integrating execution-level dynamic information directly into the iterative repair workflow. Utilizing a lightweight instrumentation tool named **[ByteTrace](https://github.com/gujiprogram/ByteTrace)**, DynaFix captures runtime variable states, branch paths, and call stacks to provide precise context. This approach mimics human debugging: if a patch fails validation, the system re-executes the program to collect updated execution traces, continuously guiding the LLM’s reasoning and avoiding the blind trial-and-error common in static-only methods.
 
 We evaluated DynaFix on the Defects4J v2.0, Real-World Benchmark (RWB), and Defects4J-Trans benchmarks, where it demonstrated superior effectiveness and robustness. DynaFix correctly repaired **236 bugs** using GPT-4 and **186** with GPT-4o, including 23 unique bugs unresolved by existing baselines. Notably, it exhibits exceptional generalization against syntactic perturbations, outperforming state-of-the-art (SOTA) methods by **15.8%–18.2%** on Defects4J-Trans. Furthermore, DynaFix is highly cost-effective, reducing token consumption by approximately **60%–70%** compared to SOTA approaches, making it a robust and efficient solution for automated program repair.
 
@@ -22,10 +22,6 @@ For more details, please refer to our [arXiv paper](https://arxiv.org/abs/2512.2
 
 ```text
 .
-├── ByteTrace/                  # 🕵️ Java Instrumentation Tool (Agent)
-│   ├── ByteTrace_code/         # Source code (Java/Kotlin implementation)
-│   └── ByteTrace.jar           # Pre-compiled Java Agent JAR file
-│
 ├── data/                       # 💾 Datasets and Input/Output Data
 │   ├── input/                  # Buggy method locations (Fault Localization)
 │   ├── output/                 # Collected dynamic runtime information
@@ -60,7 +56,11 @@ To run DynaFix and reproduce the experiments, we recommend the following environ
 ## 🚀 Setup & Execution
 
 ### Step 1. Download ByteTrace (Instrumentation Tool)
-Download the pre-compiled **`ByteTrace.jar`** from our [Release Page](https://github.com/gujiprogram/DynaFix/releases/tag/v.1.0) (or locate it directly in the `ByteTrace/` directory of this repository).
+ByteTrace is maintained in the independent [ByteTrace repository](https://github.com/gujiprogram/ByteTrace). Its source code and JAR are no longer bundled in this repository.
+
+Download **`ByteTrace.jar`** from [ByteTrace v1.0.0](https://github.com/gujiprogram/ByteTrace/releases/tag/v1.0.0) and verify it using the release's `SHA256SUMS`. For source builds, standalone examples, configuration, and output documentation, see the [ByteTrace README](https://github.com/gujiprogram/ByteTrace#readme).
+
+Use the downloaded JAR's absolute path in `ant_debug` below. The Python benchmark and repair workflow remains in DynaFix.
 
 ### Step 2. Configure Defects4J
 After you finish the setup of Defects4J, navigate to the `{Defects4J_HOME}/major/bin/` directory (where the original `ant` file is located). In this directory, create a **new** file named `ant_debug` with the following content.
@@ -134,7 +134,7 @@ python LLM_Fix.py
 Alternatively, you can override parameters directly via the CLI:
 
 ```bash
-python LLM_Fix.py --api_key "sk-..." --remote_model "gpt-4" --width_try 5
+python LLM_Fix.py --api_key "sk-..." --remote_model "gpt-4" --width_try 7 --deep_try 5 
 ```
 
 
